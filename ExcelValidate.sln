@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29806.167
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelValidate", "ExcelValidate\ExcelValidate.csproj", "{3379068D-DD18-4A7B-8152-D51041266E8D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3379068D-DD18-4A7B-8152-D51041266E8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3379068D-DD18-4A7B-8152-D51041266E8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3379068D-DD18-4A7B-8152-D51041266E8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3379068D-DD18-4A7B-8152-D51041266E8D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7CEE43CF-FF87-4C84-B59B-0A5BF292FED8}
+	EndGlobalSection
+EndGlobal
