@@ -15,6 +15,9 @@ namespace ExcelValidate
         {
             Console.WriteLine("Hello World!");
 
+            //setting directory path because of https://github.com/dotnet/project-system/issues/3619
+            Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
+
             //Excel file location relative path
             var fi = new FileInfo(@"..\..\..\ExcelData.xlsx");
 
