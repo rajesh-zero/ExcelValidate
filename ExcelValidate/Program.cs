@@ -9,126 +9,133 @@ using System.Text.RegularExpressions;
 
 namespace ExcelValidate
 {
-    class Program
+    class ExcelFile
     {
-        static void Main(string[] args)
+        public ExcelPackage excel;
+        public ExcelWorksheet firstWorksheet;
+        public ExcelFile(FileInfo fi)
         {
-            Console.WriteLine("Hello World!");
+            excel = new ExcelPackage(fi);
+            firstWorksheet = excel.Workbook.Worksheets["Sheet1"];
+        }
 
-            //setting directory path because of https://github.com/dotnet/project-system/issues/3619
-            Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
-
-            //Excel file location relative path
-            var fi = new FileInfo(@"..\..\..\ExcelData.xlsx");
-
-            //Creating Exccel file package that will contain ExcelData.xlsx
-            ExcelPackage excel = new ExcelPackage(fi);
-
-            //Specifying sheet name
-            ExcelWorksheet firstWorksheet = excel.Workbook.Worksheets["Sheet1"];
-
-            //Creating for loop to access all the rows available in Sheet1
-            //firstWorksheet.Dimension.End.Row gets the last row number that contains data
-            //Data will be accessed from 2nd row as 1st row will contain headings
-            for (int i = 2; i <= firstWorksheet.Dimension.End.Row; i++)
-            {
-                //tempdt temp variable to work with DateOfBirth column data
-                DateTime tempdt;
-
-                //getting raw column values from excel in var for further processing
-                var rawName = firstWorksheet.Cells[i, 1].Value;
-                var rawDateOfBirth = firstWorksheet.Cells[i, 2].Value;
-                var rawIsActive = firstWorksheet.Cells[i, 3].Value;
-                var rawBalance = firstWorksheet.Cells[i, 4].Value;
-                var rawLoanAmount = firstWorksheet.Cells[i, 5].Value;
-
-                //setting default value if api call fails or is not needed 
-                bool apiCheckStatus = false;
-
-                //checking data for null values
-                if (rawName != null && rawDateOfBirth != null && rawIsActive != null && rawBalance != null && rawLoanAmount != null)
+        public void CheckFields(int i)
+        {
+            /*
+            This method checks individual row that matches i
+            */
+                try
                 {
-                    //creating boolean variables to validate if data is in desired format
-                    bool validName, validDateOfBirth, validIsActive, validBalance, validLoanAmount;
-
-                    //name takes only alphabets a-z and A-Z
-                    validName = Regex.IsMatch(rawName.ToString(), @"^[a-zA-Z]+$");
-
-                    //Checking if data is of datetype
-                    validDateOfBirth = DateTime.TryParse(rawDateOfBirth.ToString(), out tempdt);
-
-                    //default value if data from excel is not boolean
-                    validIsActive = false;
-
-                    //if condition to check if rawIsActive contains boolean values if yes then assign the value to validIsActive
-                    if (rawIsActive is bool)
+                    string Name = firstWorksheet.Cells[i, 1].Value.ToString();
+                    string DateOfBirth = firstWorksheet.Cells[i, 2].Value.ToString();
+                    string IsActive = firstWorksheet.Cells[i, 3].Value.ToString();
+                    string Balance = firstWorksheet.Cells[i, 4].Value.ToString();
+                    string LoanAmount = firstWorksheet.Cells[i, 5].Value.ToString();
+                    bool stats = ValidateField( Name, DateOfBirth, IsActive, Balance, LoanAmount);
+                    bool apistatus = false;
+                    if (stats == true)
                     {
-                        validIsActive = (bool)rawIsActive;
-                    }
-
-                    //only takes numbers upto 2 decimal in Balance 
-                    validBalance = Regex.IsMatch(rawBalance.ToString(), @"^[0-9]+.\d{0,2}$");
-
-                    //only takes numbers upto 2 decimal in LoanAmount
-                    validLoanAmount = Regex.IsMatch(rawLoanAmount.ToString(), @"^[0-9]+.\d{0,2}$");
-
-                    if (validName is true && validDateOfBirth is true && validIsActive is true && validBalance is true && validLoanAmount is true)
-                    {
-                        Console.WriteLine("Row " + i + "----" + rawName.ToString() + "----" +
-                            rawDateOfBirth.ToString() + "----" +
-                            rawIsActive.ToString() + "----" +
-                            rawBalance.ToString() + "----" +
-                            rawLoanAmount.ToString());
-
-                        Console.Write("Data is Valid..... Making api call....");
-                        //calling ApiRequest method
-                        apiCheckStatus = ApiRequest(rawName.ToString(), rawDateOfBirth.ToString(), rawIsActive.ToString(), rawBalance.ToString(), rawLoanAmount.ToString());
-                        Console.WriteLine(" updating column as " + apiCheckStatus);
-
+                        apistatus = CallApi(Name, DateOfBirth, IsActive, Balance, LoanAmount);
+                        Console.WriteLine("Updating column with "+apistatus);
+                        firstWorksheet.Cells[i, 6].Value = apistatus.ToString();
                     }
                     else
                     {
-                        Console.WriteLine("Row {0} Data Validation occured updating column as {1}", i, apiCheckStatus);
+                        Console.WriteLine("validation Failed");
+                        Console.WriteLine("Updating column with "+apistatus);
+                        firstWorksheet.Cells[i, 6].Value = apistatus.ToString();
                     }
                 }
-                else
-                {
-                    Console.WriteLine("Row {0} Empty values encountered updating column as {1}", i, apiCheckStatus);
+                catch (System.Exception)
+                {                    
+                    Console.WriteLine("Empty values detected at row {0}",i);
+                    Console.WriteLine("Updating column with False");
+                    firstWorksheet.Cells[i, 6].Value = "False".ToString();
                 }
-                firstWorksheet.Cells[i, 6].Value = apiCheckStatus.ToString(); //updating success or failure status in excel
-                Console.WriteLine("\n");
+            excel.Save();
+        }
+   
+        public void CheckFields()
+        {
+            /*
+            This method checks all rows
+            */
+
+            for (int i = 2; i <= firstWorksheet.Dimension.End.Row; i++)
+            {
+                try
+                {
+                    string Name = firstWorksheet.Cells[i, 1].Value.ToString();
+                    string DateOfBirth = firstWorksheet.Cells[i, 2].Value.ToString();
+                    string IsActive = firstWorksheet.Cells[i, 3].Value.ToString();
+                    string Balance = firstWorksheet.Cells[i, 4].Value.ToString();
+                    string LoanAmount = firstWorksheet.Cells[i, 5].Value.ToString();
+                    bool stats = ValidateField( Name, DateOfBirth, IsActive, Balance, LoanAmount);
+                    bool apistatus = false;
+                    if (stats == true)
+                    {
+                        apistatus = CallApi(Name, DateOfBirth, IsActive, Balance, LoanAmount);
+                        Console.WriteLine("Updating column with "+apistatus);
+                        firstWorksheet.Cells[i, 6].Value = apistatus.ToString();
+                    }
+                    else
+                    {
+                        Console.WriteLine("validation Failed");
+                        Console.WriteLine("Updating column with "+apistatus);
+                        firstWorksheet.Cells[i, 6].Value = apistatus.ToString();
+                    }
+                }
+                catch (System.Exception)
+                {                    
+                    Console.WriteLine("Empty values detected at row {0}",i);
+                    Console.WriteLine("Updating column with False");
+                    firstWorksheet.Cells[i, 6].Value = "False".ToString();
+                }
             }
             excel.Save();
         }
-        static bool ApiRequest(string name, string dob, string isactive, string balance, string loanamount)
+        private bool ValidateField(string name,string dob,string isactive,string balance,string loanamount)
         {
-            //future reference var param = new MyClass { IntData = 1, StringData = "test123" };
+            /*
+            This method checks if all column has data in expected format
+            */
+            bool a,b,c,d,e;
+            DateTime tempdt;
+            a = Regex.IsMatch(name, @"^[a-zA-Z]+$");
+            b = DateTime.TryParse(dob, out tempdt);
+            c = Regex.IsMatch(isactive, @"True|False");
+            d = Regex.IsMatch(balance.ToString(), @"^[0-9]+.\d{0,2}$");
+            e = Regex.IsMatch(loanamount.ToString(), @"^[0-9]+.\d{0,2}$");
+            
+            return a&&b&&c&&d&&e;
+        }
 
-            //creating restclient with url to send post request
+        private bool CallApi(string name,string dob,string isactive,string balance,string loanamount)
+        {
+            /*
+            This method takes parameters and makes a call to https://httpbin.org/
+            If it gets same data in response then returns true for this records
+            */
+            bool returnStatus=false;
             var client = new RestClient("https://httpbin.org/");
-
-            //making request format by specifying api resource path i.e https://httpbin.org/post and specifying request format as json and adding parameters
-            var request = new RestRequest("post", DataFormat.Json);
+            RestRequest request = new RestRequest("post", DataFormat.Json);
             request.AddParameter("Name", name, ParameterType.GetOrPost);
             request.AddParameter("DateOfBirth", dob, ParameterType.GetOrPost);
             request.AddParameter("IsActive", isactive, ParameterType.GetOrPost);
             request.AddParameter("Balance", balance, ParameterType.GetOrPost);
             request.AddParameter("LoanAmount", loanamount, ParameterType.GetOrPost);
 
-            //Executing request to get Response
             var response = client.Post(request);
 
-            //Checking valid response from server
-            //Will check if internet connection is working and host is reachable
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                Console.Write("Status is " + response.StatusCode);
+                Console.WriteLine("Status is " + response.StatusCode);
                 var jObject = JObject.Parse(response.Content);
 
                 //Comparing received form data
                 if (jObject["form"]["Name"].ToString() == name)
                 {
-                    return true;
+                    returnStatus = true;
                 }
                 else
                 {
@@ -138,9 +145,23 @@ namespace ExcelValidate
             else
             {
                 Console.WriteLine("Status is " + response.StatusCode + "Failed");
-                return false;
+                returnStatus = false;
             }
-            return false;
+            return returnStatus;
+        }
+    }
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("-----------ExcelValidate-----------");
+            //setting directory path because of https://github.com/dotnet/project-system/issues/3619
+            //Very Important 
+            Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
+            FileInfo fi = new FileInfo(@"..\..\..\ExcelData.xlsx");
+            ExcelFile e = new ExcelFile(fi);
+            e.CheckFields();
+            //e.CheckFields(17);
         }
 
     }
