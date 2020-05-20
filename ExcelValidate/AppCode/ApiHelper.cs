@@ -15,23 +15,23 @@ class ApiHelper
     public void FormRequest(Dictionary<string, string> PersonFields)
     {
         request = new RestRequest("post", DataFormat.Json);
-        request.AddParameter("Name", PersonFields["name"], ParameterType.GetOrPost);
-        request.AddParameter("DateOfBirth", PersonFields["dob"], ParameterType.GetOrPost);
-        request.AddParameter("IsActive", PersonFields["isactive"], ParameterType.GetOrPost);
-        request.AddParameter("Balance", PersonFields["balance"], ParameterType.GetOrPost);
-        request.AddParameter("LoanAmount", PersonFields["loanamount"], ParameterType.GetOrPost);
-
+        foreach (KeyValuePair<string, string> item in PersonFields)
+        {
+            string key = item.Key.ToString();
+            string value = item.Value.ToString();
+            request.AddParameter(key, value, ParameterType.GetOrPost);
+        }
         //var response = client.Post(request);
     }
     public bool SendRequest()
     {
-        bool returnStatus=false;
+        bool returnStatus = false;
         var response = client.Post(request);
         if (response.StatusCode == HttpStatusCode.OK)
         {
             Console.WriteLine("Status is " + response.StatusCode);
             var jObject = JObject.Parse(response.Content);
-            if (jObject["form"]["Name"].ToString() != null)
+            if (jObject["form"] != null)
             {
                 returnStatus = true;
             }
