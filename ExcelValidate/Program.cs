@@ -15,9 +15,7 @@ namespace ExcelValidate
             Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
             FileInfo fi = new FileInfo(@"..\..\..\ExcelData.xlsx");
             ExcelFile e = new ExcelFile(fi);
-            e.CheckFields();
-            //e.CheckFields(17);
+            e.ProcessRows();
         }
-
     }
 }

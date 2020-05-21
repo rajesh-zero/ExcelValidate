@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Reflection;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 
@@ -12,18 +13,16 @@ class ApiHelper
     {
         client = new RestClient(url);
     }
-    public void FormRequest(Dictionary<string, string> PersonFields)
+    public void BuildRequest(string resource,Person p)
     {
         request = new RestRequest("post", DataFormat.Json);
-        foreach (KeyValuePair<string, string> item in PersonFields)
-        {
-            string key = item.Key.ToString();
-            string value = item.Value.ToString();
-            request.AddParameter(key, value, ParameterType.GetOrPost);
-        }
-        //var response = client.Post(request);
+        request.AddParameter("name",p.Name,ParameterType.GetOrPost);
+        request.AddParameter("dob",p.DateOfBirth,ParameterType.GetOrPost);
+        request.AddParameter("isActive",p.IsActive,ParameterType.GetOrPost);
+        request.AddParameter("balannce",p.Balance,ParameterType.GetOrPost);
+        request.AddParameter("loanAmount",p.LoanAmount,ParameterType.GetOrPost);
     }
-    public bool SendRequest()
+    public bool SendPost()
     {
         bool returnStatus = false;
         var response = client.Post(request);
@@ -43,7 +42,6 @@ class ApiHelper
         else
         {
             Console.WriteLine("Status is " + response.StatusCode + "Failed");
-            returnStatus = false;
         }
         return returnStatus;
     }
