@@ -20,9 +20,9 @@ class ExcelFile
     public void ProcessRow(int i)
     {
         /*
-        This method checks individual row that matches i
+        This method process individual row that matches i
         */
-        bool updateColumn = false;
+        bool updateRowAs = false;
         try
         {
             Person p = new Person();
@@ -32,12 +32,15 @@ class ExcelFile
             p.Balance = firstWorksheet.Cells[i, 4].Value.ToString();
             p.LoanAmount = firstWorksheet.Cells[i, 5].Value.ToString();
 
+            Validator v = new Validator();
+            v.ValidatePerson(p);
+            
             ApiHelper a = new ApiHelper("https://httpbin.org/");
             a.BuildRequest("post", p);
             bool apistatus = a.SendPost();
             if (apistatus == true)
             {
-                updateColumn = true;
+                updateRowAs = true;
             }
         }
         catch (System.NullReferenceException)
@@ -48,13 +51,13 @@ class ExcelFile
         {
             Console.WriteLine(e.Message);
         }
-        UpdateResultInExcel(i, updateColumn);
+        UpdateResultInExcel(i, updateRowAs);
         Console.WriteLine();
     }
     public void ProcessRows()
     {
         /*
-        This method checks all rows
+        This method process all rows
         */
 
         for (int i = 2; i <= firstWorksheet.Dimension.End.Row; i++)
