@@ -31,9 +31,8 @@ class ExcelFile
             p.IsActive = firstWorksheet.Cells[i, 3].Value.ToString();
             p.Balance = firstWorksheet.Cells[i, 4].Value.ToString();
             p.LoanAmount = firstWorksheet.Cells[i, 5].Value.ToString();
-
-            Validator v = new Validator();
-            v.ValidatePerson(p);
+            
+            Validator.Validate(p);
             
             ApiHelper a = new ApiHelper("https://httpbin.org/");
             a.BuildRequest("post", p);

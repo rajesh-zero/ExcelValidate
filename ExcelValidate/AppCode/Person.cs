@@ -1,4 +1,4 @@
-class Person
+class Person:BaseEntity
 {
 
     private string name, dateOfBirth, isActive, balance, loanAmount;
